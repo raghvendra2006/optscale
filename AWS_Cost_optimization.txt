@@ -1,0 +1,9 @@
+### script shows volumes which are not attached to any instances at this moment ####
+for region in $(aws ec2 describe-regions --query "Regions[].RegionName" --output text); do for volumeId in $(aws ec2 describe-volumes --region "$region" --filters Name=status,Values=available --query 'Volumes[].[VolumeId]' --output text); do echo "Region: $region VolumeId $volumeId"; done; done
+
+### This command will generate a list of bucket names which has public access. ###
+for bucket in $(aws s3api list-buckets --query 'Buckets[*].[Name]' --output text); do if [[ $(aws s3api get-bucket-acl --bucket "$bucket" --query 'Grants[?Grantee.URI==`http://acs.amazonaws.com/groups/global/AllUsers`]' --output text 2> /dev/null) ]] && [[ $(aws s3api get-public-access-block --bucket "$bucket" --query 'PublicAccessBlockConfiguration.BlockPublicAcls' --output text 2>/dev/null) != True ]]; then echo "$bucket"; elif [[ $(aws s3api get-bucket-policy-status --bucket "$bucket" --query 'PolicyStatus.IsPublic' --output text 2>/dev/null) == True ]] && [[ $(aws s3api get-public-access-block --bucket "$bucket" --query 'PublicAccessBlockConfiguration.BlockPublicPolicy' --output text 2>/dev/null) == False ]]; then echo "$bucket"; fi; done
+
+### AWS COst saving plan ###
+https://medium.com/@NickHystax/13-hidden-aws-charges-and-how-to-avoid-them-79b94a328e62?source=author_recirc-----9066217d260----0---------------------3b22c807_7ff7_48ca_9216_19e0cde7f00c-------
+Tool Name: Optscale -> https://github.com/hystax/optscale
